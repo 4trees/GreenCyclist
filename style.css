@@ -9,6 +9,7 @@ body{
 	background-size: 100% 100%;
 	/*background-size: contain;*/
 	background-repeat: no-repeat;
+	background-color:#e7e7e6;
 }
 /* tooltip */
 .container{
