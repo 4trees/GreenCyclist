@@ -1,31 +1,134 @@
-var m = {t:50,r:50,b:50,l:50},
+var m = {t:10,r:10,b:10,l:10},
     w = document.getElementById('canvas').clientWidth - m.l - m.r,
     h = document.getElementById('canvas').clientHeight - m.t - m.b;
 
 var plot = d3.select('.canvas')
     .append('svg')
-    .attr('width', w + m.l + m.r)
-    .attr('height', h + m.t + m.b)
+    .attr('width', w )
+    .attr('height', h + m.b )
     .append('g').attr('class','plot')
-    .attr('transform','translate('+ 0+','+ m.t+')');
+    // .attr('transform','translate('+ 0+','+ m.t+')');
 
 var scalePeople = d3.scaleLinear()
-    .range([30,w*.95])
-    .domain([0,35]),
+    .range([0,w*1.5])
+    .domain([0,1000]),
     scaleTreeY = d3.scaleLinear()
-    .range([h*.6,0])
+    .range([h*.62,40])
     .domain([0,100]),
     scaleTreeX = d3.scaleLinear()
-    .range([10,w-50])
+    .range([0,w-200])
     .domain([0,100]),
     treeSelector = d3.scaleOrdinal()
     .range(['tree1','tree2','tree3','tree4','tree5'])
+    // scaleVolumn = d3.scaleLinear()
+    // .range([0,h])
+    // .exponent(.9)
+    
 
 var isLoaded = false;
-var BySecond, MonDuration;
+var BySecond, MonDuration,nowMonStartDay;
 var allMonth = [];
+var weekTran = [{'name':'Monday','num':1},
+    {'name':'Tuesday','num':2},
+    {'name':'Wedsday','num':3},
+    {'name':'Thursday','num':4},
+    {'name':'Friday','num':5},
+    {'name':'Saturday','num':6},
+    {'name':'Sunday','num':0}]
+var monTran = [{'name':'Jan','num':1},
+    {'name':'Feb','num':2},
+    {'name':'Mar','num':3},
+    {'name':'Apr','num':4},
+    {'name':'May','num':5},
+    {'name':'Jun','num':6},
+    {'name':'Jul','num':7},
+    {'name':'Aug','num':8},
+    {'name':'Sept','num':9},
+    {'name':'Oct','num':10},
+    {'name':'Nov','num':11},
+    {'name':'Dec','num':12}]
+// people bar
+var peoplebars = plot.append('g').attr('class','peoplebars')
+    .attr('transform','translate('+25+','+(h-80) +')')
+//add bicycle person
+peoplebars.append('svg:image')
+    .attr('class','bicycleimg')
+    .attr('xlink:href',function(d){return 'img/bicycle.svg'})
+    .attr('transform','translate(0,-5)')
 
+//prepare person bar
+var gradient = peoplebars.append('defs').append('linearGradient').attr('id','Gradient')
+    .attr('x1','0%').attr('y1','0%').attr('x2','100%').attr('y2','0%')
+    gradient.append('stop')
+        .attr('offset','0%')
+        .style('stop-color','#637158')
+        .style('stop-opacity',1)
+    gradient.append('stop')
+        .attr('offset','100%')
+        .style('stop-color','#637158')
+        .style('stop-opacity',0.1)
+peoplebars.append('rect')
+    .attr('id','peoplebar')
+    // .attr('x', 80)
+    .attr('y', 80)
+    .attr('width',0)
+    .attr('height',10)
+    .style('fill','url(#Gradient)')
+//prepare number
+peoplebars.append('text').text('0')
+    .attr('id','peoplenumber')
+    .attr('class','number')
+    .attr('x',w*.15)
+    .attr('y',40)
+peoplebars.append('text').text('Rides')
+    .attr('class','type')
+    .attr('x',w*.15)
+    .attr('y',70)
+peoplebars.append('text').text('Carbon Savings of')
+    .attr('class','carbonsaving')
+    .attr('x',w*.15)
 
+//hour tree number
+var treenumber = plot.append('g').attr('class','treenumber')
+    .attr('transform','translate('+w * .35+','+(h - 80) +')')
+treenumber.append('text').text('0')
+    .attr('id','treenumber') 
+    .attr('class','number') 
+    .attr('y',40)
+treenumber.append('text').text('Trees')
+    .attr('class','type')
+    .attr('y',70)
+treenumber.append('text').text('Carbon Savings of')
+    .attr('class','carbonsaving')
+
+//equal mark
+var mark = plot.append('g').attr('class','marks')
+    .attr('transform','translate('+(w * .25)+','+(h - 60) +')')
+mark.append('text').text('=')
+    .attr('class','marks')
+    .attr('y',20)
+//in word
+var andIn = plot.append('g').attr('class','marks')
+    .attr('transform','translate('+(w * .45)+','+(h - 60) +')')
+andIn.append('text').text('in')
+    .attr('class','andIn')
+    .attr('y',20)
+//clock
+var clock = plot.append('g').attr('class','clock')
+    .attr('transform','translate('+w*.55+','+(h-80)+')')
+clock.append('text').text('')
+    .attr('id','countTime')
+    .attr('class','number') 
+    .attr('y',40)
+clock.append('text').text('')
+    .attr('id','countDate')
+    .attr('class','carbonsaving')
+clock.append('text').text('')
+    .attr('id','countWeek')
+    .attr('y',70)
+    .attr('class','type')
+
+//get data
 d3.queue()
     .defer(d3.csv,'data/trip.csv',parse)
     .await(dataloaded);
@@ -40,6 +143,73 @@ MonDuration = d3.nest()
         }
     })
     .entries(July)
+// console.table(MonDuration)
+var MonStack = [], stackDuration = 0
+MonDuration.forEach(function(d,i){
+    let monName = d.key;
+    let monDuration = d.value.totalDuration
+    stackDuration = monDuration + stackDuration
+    MonStack.push({'name':monName,'duration':monDuration,'stack':stackDuration})
+})
+
+//month volumn bar
+// var allDuration = d3.sum(MonStack,function(d){return d.duration})
+// console.log(Math.ceil(grams(allDuration) / (16000 * 30)))
+// scaleVolumn.domain([0,allDuration])
+// var yearTotal = plot.append('g').attr('class','yearTotal')
+    // .attr('transform','translate('+(w*.83)+','+10+')');
+// yearTotal.append('text').text('Total of trees: ')
+//     // .attr('x',w*.8)
+//     .attr('y',10)
+//     .attr('class','carbonsaving') 
+// yearTotal.append('text').text(Math.ceil(grams(allDuration) / (16000 * 30)))
+//     .attr('x',w*.8)
+//     .attr('y',40)
+//     .attr('class','totalNumber') 
+// yearTotal.append('text').text('Monthly trees')
+//     // .attr('x',w*.8)
+//     .attr('y',40)
+//     .attr('class','totalNumber') 
+
+// var monthTotal = plot.append('g').attr('class','monthTotal')
+//     .attr('transform','translate('+(w-70)+','+0+')')
+//     .selectAll('.mon')
+//     .data(MonStack)
+// var enterTotal = monthTotal.enter().append('g')
+//     .attr('class','mon')
+//     .attr('data-mon',function(d){return d.name})
+// enterTotal.append('rect')
+//     .attr('id',function(d){return 'mon'+d.name})
+//     .attr('class','monbar')
+//     .attr('width',40)
+//     .attr('height',function(d){return scaleVolumn(d.duration)})
+//     .attr('y', function(d){return h - scaleVolumn(d.stack)})
+//     .style('fill','none')
+//     .style('stroke-width','.5px')
+//     .style('stroke','#637158')
+//     .attr('x',40)
+//     .style('stroke-dasharray','.5,3')
+//     .style('stroke-linecap','round')
+// enterTotal.append('text').text(function(d){return Math.ceil(grams(d.duration) / (16000 * 30))})
+//     .style('fill','#555')
+//     .style('font-size','.5em')
+//     .attr('y', function(d){return h - scaleVolumn(d.stack) + scaleVolumn(d.duration)/2 + 10})
+//     .attr('x',34)
+// enterTotal.append('text').text(function(d){return d.name})
+//     .style('fill','#999')
+//     .style('font-size','.5em')
+//     .attr('y', function(d){return h - scaleVolumn(d.stack) + scaleVolumn(d.duration)/2})
+//     .attr('x',34)
+// enterTotal.append('rect')
+//     .attr('id',function(d){return 'monbarCover'+d.name})
+//     .attr('class','monbarCover')
+//     .attr('width',40)
+//     .attr('height',function(d){return scaleVolumn(d.duration)})
+//     .attr('y', function(d){return h - scaleVolumn(d.stack)})
+//     .style('fill','none')
+//     .style('stroke-width','0')
+//     .style('stroke','none')
+//     .attr('x',40)
 
 BySecond = d3.nest()
     .key(function(d){return d.hour})
@@ -48,35 +218,38 @@ BySecond = d3.nest()
         // console.log(leaves)
         return {
         'duration':d3.sum(leaves,function(d){return d.duration}),
+        'people':leaves.length,
         'data':leaves
     }})
     .entries(July);  
-    // console.log(BySecond.length)
+    // console.log(BySecond)
+nowMonStartDay = BySecond[0].key;
 isLoaded = true;
 
 }
-// plot.append('text').text('ride mile per hour = trees are planted in city')
-//             // .attr('translate','transform('+w/2+','+(h-20)+')')
-//             .attr('x',w-100)
-//             .attr('y',h+20)
-//             .style('fill','#666')
-//             .style('font-size','.7em')
-function drawBicycle(BySecondBicycle){
-    var updateBicycle = plot.selectAll('.bicycle')
-        .data(BySecondBicycle)
 
-    var enterBicycle = updateBicycle.enter().append('g').attr('class','bicycle')
+// function drawBicycleBar(BySecondBicycle){
+//     var updateBicycle = plot.selectAll('.bicycle')
+//         .data(BySecondBicycle)
+// console.log(BySecondBicycle)
+//     var enterBicycle = updateBicycle.enter().append('g').attr('class','bicycle')
 
-    var Bicycle = enterBicycle.append('svg:image')
-        .attr('class','bicycleimg')
-        .attr('xlink:href',function(d){return 'img/bicycle.svg'})
-        .attr('x',function(d,i){return scalePeople(i>35?(i-36):i)})
-        .attr('y',function(d,i){return i>30?h*.95:h*.9})
+//     // var Bicycle = enterBicycle.append('svg:image')
+//     //     .attr('class','bicycleimg')
+//     //     .attr('xlink:href',function(d){return 'img/bicycle.svg'})
+//     //     .attr('x',function(d,i){return scalePeople(i>35?(i-36):i)})
+//     //     .attr('y',function(d,i){return i>30?h*.95:h*.9})
+
+//     enterBicycle.append('rect')
+//         .attr('x', w * .2 + 60)
+//         .attr('y', h * .9)
+//         .attr('width',function(d){return scalePeople(d.people)})
+//         .attr('height',20)
         
-updateBicycle.exit().remove();
-}
+// updateBicycle.exit().remove();
+// }
 function drawTree(Trees){
-    console.log(Trees)
+    // console.log(Trees)
     var updateTree = plot.selectAll('.trees').data(Trees)
     var enterTree = updateTree.enter().append('g').attr('class','trees')
         .attr('transform',function(d){return 'translate('+Math.round(scaleTreeX(d.locationX))+','+Math.round(scaleTreeY(d.locationY))+')'})
@@ -104,13 +277,15 @@ updateTree.exit().remove();
 function grams(duration){
     return duration * 0.00267 * 411;
 }
-function selectTree(BySecondTree,days){
-    var countDays = days / 1000 / 3600 / 24;
+function selectTree(BySecondTree,secondsForDays){
+    // var countDays = secondsForDays / 3600 / 24;
+    var countDays = 1 / 24;
     var countTree = grams(BySecondTree) / (16000 * countDays);
+    if(countTree == undefined){countTree = 1}
     var howManyTree = Math.ceil(countTree)
-    console.log('howmany tree:'+countTree);
+    // console.log('howmany tree:'+countTree);
     // console.log('howmany grams from cycle:'+grams(BySecondTree));
-    console.log('how many day'+countDays)
+    // console.log('how many day'+countDays)
     var trees = []
     var randomLocationX,randomLocationY;
     for(i=0;i<howManyTree;i++){
@@ -128,8 +303,9 @@ function selectTree(BySecondTree,days){
     }
     return trees
 }
-var interval = 800;
-var t = 0, BySecondTree = 1000, nextMonIndex = 1,nextMonth, nowMonStartDay;
+var interval = 500;
+var t = 0, BySecondTree, nextMonIndex = 1,nextMonth;
+    
 
 var timer = setInterval(function(){
     updateData(t);
@@ -139,24 +315,52 @@ var timer = setInterval(function(){
 function updateData(t){
     // console.log('haha')
 if(isLoaded){
-    // console.log('ready');
-    // if(t > BySecond.length){clearInterval(timer)}
-    let BySecondBicycle = BySecond[t].value.data;
+    d3.select('#landding').remove()
+
+    let BySecondBicycle = BySecond[t].value.data.length;
+    //update people bar
+    d3.select('#peoplebar').transition().duration(500).attr('width',scalePeople(BySecondBicycle))
+    //update people count number
+    d3.select('#peoplenumber').text(BySecondBicycle)
+
+    //update clock
+    var nowDate = new Date(BySecond[t].value.data[0].time)
+    var nowHour = nowDate.getHours()<10?('0'+nowDate.getHours()):nowDate.getHours()
+    // var nowTime = nowDate.getMinutes()<10?('0'+nowDate.getMinutes()):nowDate.getMinutes()
+    var nowDay = nowDate.getDate()
+    var nowYear = nowDate.getFullYear()
+    var nowMon = monTran.find(function(d){return d.num == nowDate.getMonth() + 1}).name
+    var nowWeek = weekTran.find(function(d){return d.num == nowDate.getDay()}).name
+    d3.select('#countDate').text(nowMon+' '+nowDay+' , '+nowYear)
+    d3.select('#countTime').text(nowHour+':00')
+    d3.select('#countWeek').text(nowWeek)
+    //update tree number
+    var showTree = Math.ceil(grams(BySecondTree) / (16000 / 24))
+    if(!showTree){showTree = '<1'}
+    d3.select('#treenumber').text(showTree)
+
+    //set next month
     nextMonth = allMonth[nextMonIndex];
-    nowMonStartDay = BySecond[0].key;
-    console.log(allMonth[nextMonIndex-1])
+    // console.log(allMonth[nextMonIndex-1])
+
+    //update month
     if(BySecond[t].value.data[0].mon == nextMonth){
-        BySecondTree = 1000;
+        d3.select('#mon'+allMonth[nextMonIndex-1]).style('fill','#637158')
+        d3.select('#monbarCover'+allMonth[nextMonIndex-1]).transition().duration(1500).attr('height',0)
+        BySecondTree = 100;
         nextMonIndex++;
         nextMonth = allMonth[nextMonIndex]
         nowMonStartDay = BySecond[t].key;
     }
-    BySecondTree =  BySecondTree + BySecond[t].value.duration;
-    console.log('how many mill second till now'+BySecondTree)
-    var days = BySecond[t].key - nowMonStartDay + 1000;
-    console.log('duration second'+days)
-    var Trees = selectTree(BySecondTree,days)
-    drawBicycle(BySecondBicycle)
+    // BySecondTree =  BySecondTree + BySecond[t].value.duration;
+    BySecondTree =  BySecond[t].value.duration;
+
+    // console.log('how many mill duration till now'+BySecondTree)
+    // var secondsForDays = (BySecond[t].key - nowMonStartDay) / 1000 + 1;
+    // console.log('how many seconds till start'+secondsForDays)
+
+    // var Trees = selectTree(BySecondTree,secondsForDays)
+    var Trees = selectTree(BySecondTree)
     drawTree(Trees)
     }
 }
