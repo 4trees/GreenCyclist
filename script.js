@@ -26,27 +26,28 @@ var scalePeople = d3.scaleLinear()
     
 
 var isLoaded = false;
+// var BySecond = JSON.parse(localStorage.getItem('BySecond')) || [];
 var BySecond, MonDuration,nowMonStartDay;
 var allMonth = [];
-var weekTran = [{'name':'Monday','num':1},
-    {'name':'Tuesday','num':2},
-    {'name':'Wedsday','num':3},
-    {'name':'Thursday','num':4},
-    {'name':'Friday','num':5},
-    {'name':'Saturday','num':6},
-    {'name':'Sunday','num':0}]
-var monTran = [{'name':'Jan','num':1},
-    {'name':'Feb','num':2},
-    {'name':'Mar','num':3},
-    {'name':'Apr','num':4},
-    {'name':'May','num':5},
-    {'name':'Jun','num':6},
-    {'name':'Jul','num':7},
-    {'name':'Aug','num':8},
-    {'name':'Sept','num':9},
-    {'name':'Oct','num':10},
-    {'name':'Nov','num':11},
-    {'name':'Dec','num':12}]
+var weekTran = [{name:'Monday',num:1},
+    {name:'Tuesday',num:2},
+    {name:'Wedsday',num:3},
+    {name:'Thursday',num:4},
+    {name:'Friday',num:5},
+    {name:'Saturday',num:6},
+    {name:'Sunday',num:0}]
+var monTran = [{name:'Jan',num:0},
+    {name:'Feb',num:1},
+    {name:'Mar',num:2},
+    {name:'Apr',num:3},
+    {name:'May',num:4},
+    {name:'Jun',num:5},
+    {name:'Jul',num:6},
+    {name:'Aug',num:7},
+    {name:'Sept',num:8},
+    {name:'Oct',num:9},
+    {name:'Nov',num:10},
+    {name:'Dec',num:11}]
 // people bar
 var peoplebars = plot.append('g').attr('class','peoplebars')
     .attr('transform','translate('+25+','+(h-80) +')')
@@ -146,70 +147,11 @@ MonDuration = d3.nest()
 // console.table(MonDuration)
 var MonStack = [], stackDuration = 0
 MonDuration.forEach(function(d,i){
-    let monName = d.key;
-    let monDuration = d.value.totalDuration
+    var monName = d.key;
+    var monDuration = d.value.totalDuration
     stackDuration = monDuration + stackDuration
-    MonStack.push({'name':monName,'duration':monDuration,'stack':stackDuration})
+    MonStack.push({name:monName,duration:monDuration,stack:stackDuration})
 })
-
-//month volumn bar
-// var allDuration = d3.sum(MonStack,function(d){return d.duration})
-// console.log(Math.ceil(grams(allDuration) / (16000 * 30)))
-// scaleVolumn.domain([0,allDuration])
-// var yearTotal = plot.append('g').attr('class','yearTotal')
-    // .attr('transform','translate('+(w*.83)+','+10+')');
-// yearTotal.append('text').text('Total of trees: ')
-//     // .attr('x',w*.8)
-//     .attr('y',10)
-//     .attr('class','carbonsaving') 
-// yearTotal.append('text').text(Math.ceil(grams(allDuration) / (16000 * 30)))
-//     .attr('x',w*.8)
-//     .attr('y',40)
-//     .attr('class','totalNumber') 
-// yearTotal.append('text').text('Monthly trees')
-//     // .attr('x',w*.8)
-//     .attr('y',40)
-//     .attr('class','totalNumber') 
-
-// var monthTotal = plot.append('g').attr('class','monthTotal')
-//     .attr('transform','translate('+(w-70)+','+0+')')
-//     .selectAll('.mon')
-//     .data(MonStack)
-// var enterTotal = monthTotal.enter().append('g')
-//     .attr('class','mon')
-//     .attr('data-mon',function(d){return d.name})
-// enterTotal.append('rect')
-//     .attr('id',function(d){return 'mon'+d.name})
-//     .attr('class','monbar')
-//     .attr('width',40)
-//     .attr('height',function(d){return scaleVolumn(d.duration)})
-//     .attr('y', function(d){return h - scaleVolumn(d.stack)})
-//     .style('fill','none')
-//     .style('stroke-width','.5px')
-//     .style('stroke','#637158')
-//     .attr('x',40)
-//     .style('stroke-dasharray','.5,3')
-//     .style('stroke-linecap','round')
-// enterTotal.append('text').text(function(d){return Math.ceil(grams(d.duration) / (16000 * 30))})
-//     .style('fill','#555')
-//     .style('font-size','.5em')
-//     .attr('y', function(d){return h - scaleVolumn(d.stack) + scaleVolumn(d.duration)/2 + 10})
-//     .attr('x',34)
-// enterTotal.append('text').text(function(d){return d.name})
-//     .style('fill','#999')
-//     .style('font-size','.5em')
-//     .attr('y', function(d){return h - scaleVolumn(d.stack) + scaleVolumn(d.duration)/2})
-//     .attr('x',34)
-// enterTotal.append('rect')
-//     .attr('id',function(d){return 'monbarCover'+d.name})
-//     .attr('class','monbarCover')
-//     .attr('width',40)
-//     .attr('height',function(d){return scaleVolumn(d.duration)})
-//     .attr('y', function(d){return h - scaleVolumn(d.stack)})
-//     .style('fill','none')
-//     .style('stroke-width','0')
-//     .style('stroke','none')
-//     .attr('x',40)
 
 BySecond = d3.nest()
     .key(function(d){return d.hour})
@@ -223,6 +165,7 @@ BySecond = d3.nest()
     }})
     .entries(July);  
     // console.log(BySecond)
+// localStorage.setItem('BySecond', JSON.stringify(BySecond))
 nowMonStartDay = BySecond[0].key;
 isLoaded = true;
 
@@ -299,7 +242,7 @@ function selectTree(BySecondTree,secondsForDays){
             percentage = 1;
         }
 
-        trees.push({'img':treehref,'percentage':percentage,'locationX':randomLocationX,'locationY':randomLocationY})
+        trees.push({img:treehref,percentage:percentage,locationX:randomLocationX,locationY:randomLocationY})
     }
     return trees
 }
@@ -307,17 +250,17 @@ var interval = 500;
 var t = 0, BySecondTree, nextMonIndex = 1,nextMonth;
     
 
-var timer = setInterval(function(){
+var timer = setInterval(run, interval);
+function run(){
     updateData(t);
     t ++
-}, interval);
+}
 // clearInterval(timer);
 function updateData(t){
     // console.log('haha')
 if(isLoaded){
     d3.select('#landding').remove()
-
-    let BySecondBicycle = BySecond[t].value.data.length;
+    var BySecondBicycle = BySecond[t].value.data.length;
     //update people bar
     d3.select('#peoplebar').transition().duration(500).attr('width',scalePeople(BySecondBicycle))
     //update people count number
@@ -329,7 +272,7 @@ if(isLoaded){
     // var nowTime = nowDate.getMinutes()<10?('0'+nowDate.getMinutes()):nowDate.getMinutes()
     var nowDay = nowDate.getDate()
     var nowYear = nowDate.getFullYear()
-    var nowMon = monTran.find(function(d){return d.num == nowDate.getMonth() + 1}).name
+    var nowMon = monTran.find(function(d){return d.num == nowDate.getMonth()}).name
     var nowWeek = weekTran.find(function(d){return d.num == nowDate.getDay()}).name
     d3.select('#countDate').text(nowMon+' '+nowDay+' , '+nowYear)
     d3.select('#countTime').text(nowHour+':00')
