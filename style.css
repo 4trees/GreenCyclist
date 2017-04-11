@@ -18,14 +18,13 @@ body{
 	margin: 0 auto;
 	height: 100%;
 	width: 100%;
-	background-origin: content-box;
 	background-image: url("img/background.png");
 	background-size: cover;
 	-webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
 	background-repeat: no-repeat;
-	background-position: right bottom, left top;
+
 }
 #background{
 
