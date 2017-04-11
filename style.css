@@ -10,8 +10,12 @@ html{
 	/*padding: 0;*/
 	background-image: url("img/background.png");
 	background-size: cover;
+	-webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
 	background-repeat: no-repeat;
-	overflow-y:scroll;
+	background-position: right bottom, left top;
+	/*overflow-y:scroll;*/
 }
 html,.container,#landding{
 	height: 100%;
