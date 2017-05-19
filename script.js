@@ -164,9 +164,9 @@ BySecond = d3.nest()
         'data':leaves
     }})
     .entries(July);  
-    // console.log(BySecond)
+    console.log(July)
 // localStorage.setItem('BySecond', JSON.stringify(BySecond))
-nowMonStartDay = BySecond[0].key;
+nowMonStartDay = Array.from(BySecond)[0].key;
 isLoaded = true;
 
 }
@@ -260,18 +260,20 @@ function updateData(t){
     // console.log('haha')
 if(isLoaded){
     d3.select('#landding').remove()
-    var BySecondBicycle = BySecond[t].value.data.length;
+    var theSecond  = BySecond.find(function(d,i){return i == t});
+    var BySecondBicycle = theSecond.value.data.length;
     //update people bar
     d3.select('#peoplebar').transition().duration(500).attr('width',scalePeople(BySecondBicycle))
     //update people count number
     d3.select('#peoplenumber').text(BySecondBicycle)
 
     //update clock
-    var nowDate = new Date(BySecond[t].value.data[0].time)
+    var nowDate = new Date(theSecond.value.data[0].time)
     var nowHour = nowDate.getHours()<10?('0'+nowDate.getHours()):nowDate.getHours()
     // var nowTime = nowDate.getMinutes()<10?('0'+nowDate.getMinutes()):nowDate.getMinutes()
     var nowDay = nowDate.getDate()
     var nowYear = nowDate.getFullYear()
+    console.log(theSecond,BySecond)
     var nowMon = monTran.find(function(d){return d.num == nowDate.getMonth()}).name
     var nowWeek = weekTran.find(function(d){return d.num == nowDate.getDay()}).name
     d3.select('#countDate').text(nowMon+' '+nowDay+' , '+nowYear)
@@ -287,16 +289,16 @@ if(isLoaded){
     // console.log(allMonth[nextMonIndex-1])
 
     //update month
-    if(BySecond[t].value.data[0].mon == nextMonth){
+    if(theSecond.value.data[0].mon == nextMonth){
         d3.select('#mon'+allMonth[nextMonIndex-1]).style('fill','#637158')
         d3.select('#monbarCover'+allMonth[nextMonIndex-1]).transition().duration(1500).attr('height',0)
         BySecondTree = 100;
         nextMonIndex++;
         nextMonth = allMonth[nextMonIndex]
-        nowMonStartDay = BySecond[t].key;
+        nowMonStartDay = theSecond.key;
     }
     // BySecondTree =  BySecondTree + BySecond[t].value.duration;
-    BySecondTree =  BySecond[t].value.duration;
+    BySecondTree =  theSecond.value.duration;
 
     // console.log('how many mill duration till now'+BySecondTree)
     // var secondsForDays = (BySecond[t].key - nowMonStartDay) / 1000 + 1;
@@ -309,17 +311,19 @@ if(isLoaded){
 }
 
 function parse(d,i){
-var month = new Date(d['starttime']).getFullYear() * 100 + new Date(d['starttime']).getMonth() + 1;
+var date = new Date(d['starttime'].replace(/-/g, "/"))
+var month = date.getFullYear() * 100 + date.getMonth() + 1;
     if( !allMonth.includes(month) ){
         allMonth.push(month);
     }
     return {
         duration: +d['tripduration'],
-        time: new Date(d['starttime']).getTime(),
-        mon: new Date(d['starttime']).getFullYear() * 100 + new Date(d['starttime']).getMonth() + 1,
+        // time: new Date(d['starttime']).getTime(),
+        time: date.getTime(),
+        mon: date.getFullYear() * 100 + date.getMonth() + 1,
         // mon: month
         // date:new Date(d['starttime']),
         // min:new Date(d['starttime']) - new Date(d['starttime']).getSeconds()*1000,
-        hour:new Date(d['starttime']) - new Date(d['starttime']).getMinutes()*60000-new Date(d['starttime']).getSeconds()*1000,
+        hour:date - date.getMinutes()*60000-date.getSeconds()*1000,
     }
 }
