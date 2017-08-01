@@ -16,7 +16,7 @@ var seasonPoint = [
 	{name:3,range:[9,10,11]},
 	{name:4,range:[12,1,2]}]
 
-var	file = '/data/trip.csv';
+var	file = 'data/trip.csv';
 
 d3.queue()
   .defer(d3.csv,file,parse)
