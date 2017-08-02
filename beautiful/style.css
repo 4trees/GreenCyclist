@@ -1,0 +1,14 @@
+#canvas{
+	width: 100%;
+
+}
+text tspan{
+	text-anchor:middle;
+}
+.tree{
+	height: 35px;
+	width: auto;
+}
+.rider{
+	fill:#999;
+}
