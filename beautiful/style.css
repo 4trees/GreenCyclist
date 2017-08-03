@@ -1,14 +1,31 @@
-#canvas{
-	width: 100%;
+body{
+	margin: 0;
+}
+#canvas {
+    width: 100%;
+}
 
+text tspan {
+    text-anchor: middle;
 }
-text tspan{
-	text-anchor:middle;
+
+.tree {
+    height: 90px;
+    width: auto;
+    opacity: .8;
 }
-.tree{
-	height: 35px;
+
+.rider {
+    fill: #999;
+}
+.bg{
 	width: auto;
 }
-.rider{
-	fill:#999;
+.label{
+	position: fixed;
+	top:0;
+	background: #fff;
+	padding:5px 8px;
+	color:#333;
+	margin: 0 auto;
 }
