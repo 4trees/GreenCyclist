@@ -4,11 +4,17 @@ body{
 #canvas {
     width: 100%;
 }
-
+.title{
+	padding: 20px 20px;
+	text-align: center;
+}
 text tspan {
     text-anchor: middle;
 }
-
+.hidden{
+	display: none;
+	visibility: none;
+}
 .tree {
     height: 90px;
     width: auto;

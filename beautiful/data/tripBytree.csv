@@ -1,0 +1,37 @@
+time,season,rides,totalDuration,trees
+night,spring,3580,16658937,91
+sunrise,spring,1613,5526604,30
+early AM,spring,4826,4106835,67
+AMPeak,spring,35910,44578931,366
+middayBase,spring,58075,89378333,326
+middaySchool,spring,37778,70873637,466
+PMPeak,spring,65290,100160772,659
+evening,spring,39674,63973533,300
+lateEvening,spring,8053,15486178,127
+night,summer,7869,16940714,92
+sunrise,summer,3868,5074172,27
+early AM,summer,11514,10402775,171
+AMPeak,summer,72848,64472192,530
+middayBase,summer,107097,146594949,536
+middaySchool,summer,68630,114806113,755
+PMPeak,summer,124873,163420853,1076
+evening,summer,90558,117681440,553
+lateEvening,summer,18993,35344293,290
+night,autumn,6178,18670115,102
+sunrise,autumn,2774,12099061,66
+early AM,autumn,8551,7847373,129
+AMPeak,autumn,62040,49710589,409
+middayBase,autumn,95157,102131557,373
+middaySchool,autumn,58400,77116961,507
+PMPeak,autumn,99063,105255991,693
+evening,autumn,59158,67308305,316
+lateEvening,autumn,12144,12036935,99
+night,winter,1326,1721840,9
+sunrise,winter,478,701096,3
+early AM,winter,1397,984129,16
+AMPeak,winter,11893,10328825,85
+middayBase,winter,21587,17813867,65
+middaySchool,winter,11810,10714236,70
+PMPeak,winter,18837,15831821,104
+evening,winter,11839,10530318,49
+lateEvening,winter,2610,1833773,15
